@@ -1,0 +1,152 @@
+#!/usr/bin/env node
+'use strict';
+
+const path = require('path');
+const { spawn } = require('child_process');
+
+const VERSION = '1.2.0';
+const ROOT = path.resolve(__dirname, '..');
+
+const COMMANDS = {
+  // recon
+  scan:             'skills/scan/scripts/scan.js',
+  map:              'skills/map/scripts/map.js',
+  research:         'skills/research/scripts/research.js',
+  inventory:        'skills/inventory/scripts/inventory.js',
+
+  // review
+  slop:             'skills/slop/scripts/slop.js',
+  critique:         'skills/critique/scripts/critique.js',
+  review:           'skills/review/scripts/review.js',
+  investigate:      'skills/investigate/scripts/investigate.js',
+  'second-opinion': 'skills/second-opinion/scripts/second-opinion.js',
+
+  // build
+  component:        'skills/component/scripts/component.js',
+  typography:       'skills/typography/scripts/typography.js',
+  color:            'skills/color/scripts/color.js',
+  spacing:          'skills/spacing/scripts/spacing.js',
+  motion:           'skills/motion/scripts/motion.js',
+
+  // plan
+  brief:            'skills/brief/scripts/brief.js',
+  'plan-eng':       'skills/plan-eng/scripts/plan-eng.js',
+  'plan-design':    'skills/plan-design/scripts/plan-design.js',
+  autoplan:         'skills/autoplan/scripts/autoplan.js',
+
+  // ship
+  ship:             'skills/ship/scripts/ship.js',
+  handoff:          'skills/handoff/scripts/handoff.js',
+  docs:             'skills/docs/scripts/docs.js',
+  land:             'skills/land/scripts/land.js',
+  canary:           'skills/canary/scripts/canary.js',
+  storybook:        'skills/storybook/scripts/storybook.js',
+
+  // test
+  qa:               'skills/qa/scripts/qa.js',
+  accessibility:    'skills/accessibility/scripts/accessibility.js',
+  perf:             'skills/perf/scripts/perf.js',
+  diff:             'skills/diff/scripts/diff.js',
+
+  // reflect
+  retro:            'skills/retro/scripts/retro.js',
+  memory:           'skills/memory/scripts/memory.js',
+  benchmark:        'skills/benchmark/scripts/benchmark.js',
+
+  // power
+  forge:            'skills/forge/scripts/forge.js',
+  sync:             'skills/sync/scripts/sync.js',
+  tailwind:         'skills/tailwind/scripts/tailwind.js',
+  careful:          'skills/careful/scripts/careful.js',
+  freeze:           'skills/freeze/scripts/freeze.js'
+};
+
+const HELP = `dragoon - design intelligence for ai coding agents
+
+USAGE
+  dragoon <command> [args]
+
+RECON
+  scan            fingerprint a codebase, write dragoon.json
+  map             architecture overview: hot files, orphans, deps
+  research        structured research template (no network)
+  inventory       catalog components, hooks, pages, stories, tokens
+
+REVIEW
+  slop            detect ai-generated design slop (12 rules)
+  critique        0-100 design quality scoring
+  review          unified code + design review on a diff
+  investigate     structured root-cause investigation template
+  second-opinion  build a packet to paste into another model
+
+BUILD
+  component       scaffold a component in your codebase's style
+  typography      generate type scale tokens
+  color           generate color palette tokens
+  spacing         generate spacing scale tokens
+  motion          generate motion tokens
+
+PLAN
+  brief           product brief template, codebase facts pre-loaded
+  plan-eng        engineering plan template
+  plan-design     design plan template
+  autoplan        run brief + plan-eng + plan-design at once
+
+SHIP
+  ship            pre-PR checks (critique, slop, optional gh PR open)
+  handoff         dev handoff doc with stack, tokens, conventions
+  docs            drift detection between docs and reality
+  land            post-merge sanity check (synced, working tree clean)
+  canary          generate a canary watcher script for a deployed url
+  storybook       scaffold storybook config + auto-stories per component
+
+TEST
+  qa              scaffold a playwright e2e test suite
+  accessibility   file-level a11y rules (8 rules)
+  perf            static perf hints + lighthouse json ingestion
+  diff            scaffold a playwright visual regression suite
+
+REFLECT
+  retro           weekly retro template with git stats pre-loaded
+  memory          persistent project key-value store
+  benchmark       snapshot codebase metrics for trend tracking
+
+POWER
+  forge           scaffold a new dragoon skill (sandboxed)
+  sync            export design tokens to figma.tokens.json
+  tailwind        unified tailwind.config.js from manifest
+  careful         write checklist of destructive commands to confirm
+  freeze          declare directories off-limits + optional pre-commit hook
+
+OTHER
+  --version, -v   print version
+  --help, -h      this message
+
+Each command takes its own flags. Try:
+  dragoon <command> --help
+
+VERSION ${VERSION}
+`;
+
+function main() {
+  const argv = process.argv.slice(2);
+  if (argv.length === 0 || argv[0] === '--help' || argv[0] === '-h') {
+    process.stdout.write(HELP);
+    process.exit(0);
+  }
+  if (argv[0] === '--version' || argv[0] === '-v') {
+    process.stdout.write(`${VERSION}\n`);
+    process.exit(0);
+  }
+  const cmd = argv[0];
+  const rest = argv.slice(1);
+  const target = COMMANDS[cmd];
+  if (!target) {
+    process.stderr.write(`unknown command: ${cmd}\n\n${HELP}`);
+    process.exit(2);
+  }
+  const child = spawn(process.execPath, [path.join(ROOT, target), ...rest], { stdio: 'inherit' });
+  child.on('exit', (code) => process.exit(code === null ? 1 : code));
+}
+
+main();

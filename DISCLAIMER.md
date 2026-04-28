@@ -1,32 +1,30 @@
-# Disclaimer
+# disclaimer
 
-## Educational & Experimental Purpose
+dragoon is experimental research-grade tooling for design hygiene in ai-coded projects.
 
-This project is provided strictly for **educational and experimental purposes only**. The skills, scripts, and documentation included are learning resources and workflow experiments shared with the open-source community.
+## what dragoon is
 
-## Do Your Own Research (DYOR)
+a heuristic scanner. it reads your source files with regex-level parsing, infers structural patterns, and outputs measurements and findings. those findings are useful guidance, not legal compliance, not gospel.
 
-- All tools and scripts are provided as-is with no guarantees of accuracy, completeness, or fitness for any particular purpose.
-- Users are solely responsible for evaluating the suitability of any skill or script for their specific use case.
-- Do not rely on any output from these tools for critical decisions without independent verification.
-- The contrast checker, accessibility audit, and other quality tools are aids, not substitutes for professional auditing.
+## what dragoon is not
 
-## No Warranty
+not a security tool. not a legal compliance audit. not an accessibility audit (it surfaces a few accessibility signals; it does not replace a real wcag audit). not a substitute for human design review.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. THE AUTHOR ASSUMES NO LIABILITY FOR ANY DAMAGES ARISING FROM THE USE OF THIS SOFTWARE.
+## how to use it well
 
-## Not Professional Advice
+- always validate findings against your actual design system.
+- treat scores as relative, not absolute. compare your project to itself over time.
+- the inference is heuristic. expect false positives. the rules are tuned to be useful at scale, not perfect on any single file.
+- edit `dragoon.json` rules by hand when the auto-derived defaults don't match your intent.
 
-Nothing in this repository constitutes professional design, legal, medical, financial, or business advice. The productivity tools (email drafter, feedback formatter, etc.) generate templates and suggestions that require human review and judgment before use.
+## privacy
 
-## Author Liability
+dragoon makes no network calls. it reads files locally and writes one json file locally. no telemetry. no analytics. no cloud.
 
-The author (Dragoon0x) is not responsible for:
-- Any decisions made based on output from these tools
-- Any damages resulting from the use or misuse of these scripts
-- The accuracy of any generated content, estimates, or recommendations
-- How users choose to apply or redistribute this software
+## warranty
 
-## Use At Your Own Risk
+none. see LICENSE for the full mit terms. the software is provided as is.
 
-By using this software, you acknowledge that you have read this disclaimer and agree to use the tools at your own risk. Always apply your own judgment and verify outputs independently.
+## learning in public
+
+dragoon is built openly. issues, prs, and proposals welcome. the goal is design quality tooling that respects the realities of shipping software with ai. it's not perfect. it improves with use.

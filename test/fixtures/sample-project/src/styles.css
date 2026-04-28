@@ -1,0 +1,25 @@
+:root {
+  --fg: #0a0a0a;
+  --bg: #fafafa;
+  --accent: #2563eb;
+}
+body { font-family: 'Inter', sans-serif; font-size: 16px; color: var(--fg); }
+h1 { font-size: 32px; }
+h2 { font-size: 25px; }
+h3 { font-size: 20px; }
+.card {
+  padding: 16px;
+  margin: 8px;
+  gap: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  transition: 200ms ease-out;
+}
+.dialog {
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+@media (min-width: 768px) {
+  .card { padding: 24px; }
+}

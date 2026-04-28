@@ -1,0 +1,273 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dragoon-skills.dev/schema/dragoon.schema.json",
+  "title": "Dragoon Project Manifest",
+  "description": "The canonical fingerprint of a codebase's design DNA. Every dragoon skill reads or writes against this schema.",
+  "type": "object",
+  "required": ["version", "generatedAt", "stack", "tokens", "metrics"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version. Bumps on breaking changes.",
+      "const": "1.0.0"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of when this manifest was generated."
+    },
+    "project": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "root": { "type": "string", "description": "Absolute or repo-relative root path." }
+      }
+    },
+    "stack": {
+      "type": "object",
+      "required": ["framework", "styling"],
+      "properties": {
+        "framework": {
+          "type": "string",
+          "enum": ["react", "next", "vue", "nuxt", "svelte", "sveltekit", "astro", "solid", "qwik", "vanilla", "unknown"]
+        },
+        "styling": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["css", "scss", "tailwind", "css-modules", "styled-components", "emotion", "stylex", "vanilla-extract", "unocss", "panda"]
+          }
+        },
+        "language": {
+          "type": "string",
+          "enum": ["typescript", "javascript", "mixed"]
+        },
+        "buildTool": { "type": "string" },
+        "packageManager": {
+          "type": "string",
+          "enum": ["npm", "yarn", "pnpm", "bun", "unknown"]
+        }
+      }
+    },
+    "tokens": {
+      "type": "object",
+      "description": "Detected design tokens. Each token bucket includes both the raw extracted values and the inferred system.",
+      "properties": {
+        "color": {
+          "type": "object",
+          "properties": {
+            "palette": {
+              "type": "array",
+              "description": "Top distinct colors by usage frequency.",
+              "items": {
+                "type": "object",
+                "required": ["value", "count"],
+                "properties": {
+                  "value": { "type": "string", "description": "Normalized to lowercase hex." },
+                  "count": { "type": "integer", "minimum": 1 },
+                  "role": {
+                    "type": "string",
+                    "enum": ["foreground", "background", "accent", "border", "muted", "danger", "success", "warning", "info", "unknown"]
+                  }
+                }
+              }
+            },
+            "totalDistinct": { "type": "integer" }
+          }
+        },
+        "spacing": {
+          "type": "object",
+          "properties": {
+            "values": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["px", "count"],
+                "properties": {
+                  "px": { "type": "number" },
+                  "count": { "type": "integer" }
+                }
+              }
+            },
+            "inferredGrid": {
+              "type": "integer",
+              "description": "Detected base grid in px (4, 8, etc). Null if no clear grid.",
+              "minimum": 1
+            },
+            "gridConfidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "0..1 confidence the grid is real."
+            }
+          }
+        },
+        "type": {
+          "type": "object",
+          "properties": {
+            "fontFamilies": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "value": { "type": "string" },
+                  "count": { "type": "integer" }
+                }
+              }
+            },
+            "fontSizes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "px": { "type": "number" },
+                  "count": { "type": "integer" }
+                }
+              }
+            },
+            "inferredScaleRatio": {
+              "type": "number",
+              "description": "Best-fit ratio for the type scale (e.g. 1.25, 1.333). Null if no clear scale."
+            },
+            "scaleConfidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "radius": {
+          "type": "object",
+          "properties": {
+            "values": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "px": { "type": "number" },
+                  "count": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "shadow": {
+          "type": "object",
+          "properties": {
+            "values": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "value": { "type": "string" },
+                  "count": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "motion": {
+          "type": "object",
+          "properties": {
+            "durations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "ms": { "type": "number" },
+                  "count": { "type": "integer" }
+                }
+              }
+            },
+            "easings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "value": { "type": "string" },
+                  "count": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "breakpoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "px": { "type": "number" },
+              "count": { "type": "integer" }
+            }
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Aggregate signals about codebase shape.",
+      "properties": {
+        "files": {
+          "type": "object",
+          "properties": {
+            "scanned": { "type": "integer" },
+            "css": { "type": "integer" },
+            "scss": { "type": "integer" },
+            "jsx": { "type": "integer" },
+            "tsx": { "type": "integer" },
+            "vue": { "type": "integer" },
+            "svelte": { "type": "integer" },
+            "html": { "type": "integer" }
+          }
+        },
+        "components": {
+          "type": "object",
+          "properties": {
+            "estimated": { "type": "integer" },
+            "averageSizeLines": { "type": "number" }
+          }
+        },
+        "accessibility": {
+          "type": "object",
+          "properties": {
+            "imagesWithAlt": { "type": "integer" },
+            "imagesWithoutAlt": { "type": "integer" },
+            "buttonsWithLabel": { "type": "integer" },
+            "buttonsWithoutLabel": { "type": "integer" },
+            "ariaUsage": { "type": "integer" },
+            "semanticTagUsage": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "scores": {
+      "type": "object",
+      "description": "0-100 quality scores. Written by /critique, read by /review and /ship.",
+      "properties": {
+        "overall": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "typography": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "color": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "spacing": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "motion": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "accessibility": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "consistency": { "type": "integer", "minimum": 0, "maximum": 100 }
+      }
+    },
+    "rules": {
+      "type": "object",
+      "description": "Inferred rules other skills enforce. Editable by hand after /scan runs.",
+      "properties": {
+        "spacingGrid": { "type": "integer" },
+        "typeScaleRatio": { "type": "number" },
+        "maxShadowVariants": { "type": "integer" },
+        "maxRadiusVariants": { "type": "integer" },
+        "maxFontFamilies": { "type": "integer" },
+        "maxEasingVariants": { "type": "integer" },
+        "allowedColors": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

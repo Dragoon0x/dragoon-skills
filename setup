@@ -1,0 +1,201 @@
+#!/usr/bin/env bash
+# dragoon install
+# detects supported coding agents on the system and installs the skill pack
+# usage: ./setup [--prefix DIR] [--hosts h1,h2,...] [--uninstall] [--list-hosts] [--dry-run]
+
+set -e
+
+VERSION="1.2.0"
+PREFIX="${HOME}"
+DRAGOON_DIR=""
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# colors
+if [ -t 1 ] && [ -z "${NO_COLOR}" ]; then
+  C_BOLD="\033[1m"; C_DIM="\033[2m"; C_GREEN="\033[32m"; C_YELLOW="\033[33m"
+  C_RED="\033[31m"; C_CYAN="\033[36m"; C_RESET="\033[0m"
+else
+  C_BOLD=""; C_DIM=""; C_GREEN=""; C_YELLOW=""; C_RED=""; C_CYAN=""; C_RESET=""
+fi
+
+UNINSTALL=0
+DRY_RUN=0
+LIST_HOSTS=0
+HOSTS_FILTER=""
+
+# host registry: NAME:DETECT_PATH:INSTALL_PATH
+# DETECT_PATH = path that exists if the host is installed
+# INSTALL_PATH = where to drop dragoon skills
+HOSTS=(
+  "claude-code:.claude:.claude/skills"
+  "codex:.codex:.codex/skills"
+  "cursor:.cursor:.cursor/skills"
+  "opencode:.opencode:.opencode/skills"
+  "factory:.factory:.factory/skills"
+  "kiro:.kiro:.kiro/skills"
+)
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --prefix) PREFIX="$2"; shift 2 ;;
+    --hosts) HOSTS_FILTER="$2"; shift 2 ;;
+    --uninstall) UNINSTALL=1; shift ;;
+    --dry-run) DRY_RUN=1; shift ;;
+    --list-hosts) LIST_HOSTS=1; shift ;;
+    --help|-h)
+      cat <<EOF
+dragoon setup - install the dragoon skill pack
+
+USAGE
+  ./setup [--prefix DIR] [--hosts h1,h2,...] [--uninstall] [--dry-run]
+
+FLAGS
+  --prefix DIR      home prefix to install under (default: \$HOME)
+  --hosts h1,h2     only install for these hosts (default: all detected)
+  --uninstall       remove dragoon from all detected hosts
+  --dry-run         show what would happen, change nothing
+  --list-hosts      list supported hosts and exit
+  --help, -h        this message
+
+EOF
+      exit 0
+      ;;
+    *) echo "unknown flag: $1" >&2; exit 2 ;;
+  esac
+done
+
+if [ $LIST_HOSTS -eq 1 ]; then
+  echo "supported hosts:"
+  for entry in "${HOSTS[@]}"; do
+    name="${entry%%:*}"
+    echo "  $name"
+  done
+  exit 0
+fi
+
+# resolve dragoon source dir to live under ~/.dragoon
+DRAGOON_DIR="${PREFIX}/.dragoon"
+
+echo
+printf "${C_BOLD}dragoon setup${C_RESET}  v${VERSION}\n"
+echo
+
+# step 1: place the source pack
+if [ $UNINSTALL -eq 0 ]; then
+  if [ "${SCRIPT_DIR}" != "${DRAGOON_DIR}" ]; then
+    if [ $DRY_RUN -eq 1 ]; then
+      printf "${C_DIM}would copy ${SCRIPT_DIR} -> ${DRAGOON_DIR}${C_RESET}\n"
+    else
+      mkdir -p "${DRAGOON_DIR}"
+      # copy everything except node_modules and the install script noise
+      rsync_available=$(command -v rsync >/dev/null 2>&1 && echo 1 || echo 0)
+      if [ "$rsync_available" = "1" ]; then
+        rsync -a --delete \
+          --exclude node_modules --exclude .git --exclude '*.tar.gz' \
+          "${SCRIPT_DIR}/" "${DRAGOON_DIR}/"
+      else
+        # fallback: cp -a then prune
+        cp -a "${SCRIPT_DIR}/." "${DRAGOON_DIR}/"
+        rm -rf "${DRAGOON_DIR}/node_modules" "${DRAGOON_DIR}/.git" 2>/dev/null || true
+      fi
+      printf "${C_GREEN}✓${C_RESET} installed to ${DRAGOON_DIR}\n"
+    fi
+  fi
+fi
+
+# step 2: detect hosts and link skills
+linked_any=0
+detected_any=0
+for entry in "${HOSTS[@]}"; do
+  name="${entry%%:*}"
+  rest="${entry#*:}"
+  detect_path="${rest%%:*}"
+  install_path="${rest#*:}"
+  full_detect="${PREFIX}/${detect_path}"
+  full_install="${PREFIX}/${install_path}"
+
+  if [ -n "$HOSTS_FILTER" ] && [[ ",${HOSTS_FILTER}," != *",${name},"* ]]; then
+    continue
+  fi
+
+  if [ ! -d "$full_detect" ]; then
+    continue
+  fi
+  detected_any=1
+
+  if [ $UNINSTALL -eq 1 ]; then
+    target_dir="${full_install}/dragoon"
+    if [ -e "$target_dir" ] || [ -L "$target_dir" ]; then
+      if [ $DRY_RUN -eq 1 ]; then
+        printf "${C_DIM}would remove ${target_dir}${C_RESET}\n"
+      else
+        rm -rf "$target_dir"
+        printf "${C_GREEN}✓${C_RESET} removed dragoon from ${name}\n"
+      fi
+    fi
+    continue
+  fi
+
+  # install
+  mkdir -p "$full_install" 2>/dev/null || true
+  target_dir="${full_install}/dragoon"
+
+  if [ $DRY_RUN -eq 1 ]; then
+    printf "${C_DIM}would link ${target_dir} -> ${DRAGOON_DIR}${C_RESET}\n"
+    linked_any=1
+    continue
+  fi
+
+  # remove existing dragoon dir or symlink
+  if [ -e "$target_dir" ] || [ -L "$target_dir" ]; then
+    rm -rf "$target_dir"
+  fi
+
+  # try symlink first; fallback to copy
+  if ln -s "${DRAGOON_DIR}" "$target_dir" 2>/dev/null; then
+    printf "${C_GREEN}✓${C_RESET} linked dragoon -> ${name} (${install_path})\n"
+  else
+    cp -a "${DRAGOON_DIR}" "$target_dir"
+    printf "${C_GREEN}✓${C_RESET} copied dragoon -> ${name} (${install_path})\n"
+  fi
+  linked_any=1
+done
+
+if [ $detected_any -eq 0 ]; then
+  printf "${C_YELLOW}!${C_RESET} no supported hosts detected under ${PREFIX}\n"
+  printf "${C_DIM}  (looked for: claude-code, codex, cursor, opencode, factory, kiro)${C_RESET}\n"
+  printf "${C_DIM}  install one, then re-run setup${C_RESET}\n"
+  exit 0
+fi
+
+if [ $UNINSTALL -eq 1 ]; then
+  echo
+  printf "${C_GREEN}done.${C_RESET} dragoon uninstalled.\n"
+  exit 0
+fi
+
+# step 3: verify the binary works
+if [ $DRY_RUN -eq 0 ]; then
+  if command -v node >/dev/null 2>&1; then
+    if node "${DRAGOON_DIR}/bin/dragoon" --version >/dev/null 2>&1; then
+      printf "${C_GREEN}✓${C_RESET} dragoon binary verified\n"
+    else
+      printf "${C_RED}!${C_RESET} dragoon binary failed self-check\n"
+      exit 1
+    fi
+  else
+    printf "${C_YELLOW}!${C_RESET} node not found on PATH. install node 18+ before using dragoon.\n"
+  fi
+fi
+
+echo
+printf "${C_BOLD}done.${C_RESET}\n"
+echo
+printf "next steps:\n"
+printf "  ${C_CYAN}dragoon scan${C_RESET}        fingerprint your codebase\n"
+printf "  ${C_CYAN}dragoon slop${C_RESET}        find ai-generated design slop\n"
+printf "  ${C_CYAN}dragoon critique${C_RESET}    score design quality 0-100\n"
+printf "  ${C_CYAN}dragoon review${C_RESET}      unified code + design review\n"
+echo
+printf "${C_DIM}docs: ${DRAGOON_DIR}/README.md${C_RESET}\n"
+echo

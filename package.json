@@ -1,0 +1,64 @@
+{
+  "name": "dragoon-skills",
+  "version": "1.2.0",
+  "description": "design intelligence for ai coding agents",
+  "bin": {
+    "dragoon": "./bin/dragoon"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "test:smoke": "bash scripts/smoke.sh",
+    "scan": "node bin/dragoon scan",
+    "slop": "node bin/dragoon slop",
+    "critique": "node bin/dragoon critique",
+    "review": "node bin/dragoon review",
+    "ship": "node bin/dragoon ship",
+    "accessibility": "node bin/dragoon accessibility",
+    "perf": "node bin/dragoon perf",
+    "docs:check": "node bin/dragoon docs",
+    "land": "node bin/dragoon land",
+    "memory": "node bin/dragoon memory",
+    "benchmark": "node bin/dragoon benchmark"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "schema",
+    "skills",
+    "setup",
+    "README.md",
+    "LICENSE",
+    "DISCLAIMER.md"
+  ],
+  "keywords": [
+    "design",
+    "ai",
+    "claude-code",
+    "codex",
+    "cursor",
+    "design-system",
+    "design-tokens",
+    "linter",
+    "code-review",
+    "accessibility",
+    "performance",
+    "playwright",
+    "visual-regression",
+    "lighthouse",
+    "figma-tokens",
+    "root-cause",
+    "retro",
+    "benchmark",
+    "forge"
+  ],
+  "author": "dragoon0x",
+  "license": "MIT",
+  "homepage": "https://github.com/dragoon0x/dragoon-skills",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dragoon0x/dragoon-skills.git"
+  }
+}
