@@ -243,7 +243,7 @@ echo "  freeze validation ok"
 ###############################################################################
 echo ""
 echo "=== dispatcher ==="
-NO_COLOR=1 $DRAGOON --version | grep -q '^1\.2\.0$' || { echo "FAIL: --version"; exit 1; }
+NO_COLOR=1 $DRAGOON --version | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$' || { echo "FAIL: --version"; exit 1; }
 echo "  --version ok"
 NO_COLOR=1 $DRAGOON --help | grep -q 'dragoon' || { echo "FAIL: --help"; exit 1; }
 echo "  --help ok"

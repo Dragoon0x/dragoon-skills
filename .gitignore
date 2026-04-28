@@ -1,5 +1,8 @@
 node_modules/
 .DS_Store
 *.log
-.env
-.env.local
+*.tar.gz
+coverage/
+.idea/
+.vscode/
+*.swp
