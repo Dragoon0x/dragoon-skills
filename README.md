@@ -8,17 +8,30 @@ thirty-six commands. zero npm dependencies. node 18+ and you're done.
 
 ## install
 
-one line, multi-host:
+zero install. just run it:
 
 ```bash
-git clone https://github.com/dragoon0x/dragoon-skills.git
+npx dragoon scan
+```
+
+or install globally:
+
+```bash
+npm install -g dragoon-skills
+dragoon scan
+```
+
+or clone the source if you want to read the code first or contribute:
+
+```bash
+git clone https://github.com/Dragoon0x/dragoon-skills.git
 cd dragoon-skills
 ./setup
 ```
 
 setup auto-detects every coding agent on your machine: claude-code, codex, cursor, opencode, factory, kiro. installs once, works everywhere.
 
-requirements: node 18+. that's it. zero npm packages, zero browsers, zero network calls.
+requirements: node 18+. that's it. zero npm dependencies, zero browsers, zero network calls.
 
 ## the sprint
 
@@ -70,12 +83,14 @@ the agent now has reference points: your shadow tokens, your radius scale, your 
 
 ```bash
 cd your-project
-dragoon scan                # writes dragoon.json
-dragoon critique            # see your design score
-dragoon slop                # find ai-generated patterns to fix
-dragoon component Card --apply
-dragoon ship                # pre-PR checks before push
+npx dragoon scan                # writes dragoon.json
+npx dragoon critique            # see your design score
+npx dragoon slop                # find ai-generated patterns to fix
+npx dragoon component Card --apply
+npx dragoon ship                # pre-PR checks before push
 ```
+
+if you've installed globally with `npm install -g dragoon-skills`, drop the `npx` prefix.
 
 ## the thirty-six commands
 
@@ -254,9 +269,9 @@ every command has:
 ## development
 
 ```bash
-git clone https://github.com/dragoon0x/dragoon-skills.git
+git clone https://github.com/Dragoon0x/dragoon-skills.git
 cd dragoon-skills
-node --test test/*.test.js     # 209 tests, zero deps
+node --test test/*.test.js     # 210 tests, zero deps
 bash scripts/smoke.sh          # end-to-end on a fixture project, all 36 commands
 ```
 
