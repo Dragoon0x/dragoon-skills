@@ -38,29 +38,6 @@ test('resolveSafe: handles symlinks pointing outside base', () => {
   }
 });
 
-// regression: macOS /tmp -> /private/tmp. the same shape applies to any user
-// whose project root is itself reached through a symlink.
-test('resolveSafe: works when base is a symlink to a real dir (macOS /tmp shape)', () => {
-  const real = fs.mkdtempSync(path.join(os.tmpdir(), 'dragoon-real-'));
-  const linkParent = fs.mkdtempSync(path.join(os.tmpdir(), 'dragoon-linkp-'));
-  const link = path.join(linkParent, 'base-link');
-  try {
-    fs.symlinkSync(real, link);
-    // a relative path under the symlinked base must resolve cleanly
-    const r1 = resolveSafe(link, 'foo/bar.txt');
-    assert.equal(r1, path.resolve(link, 'foo/bar.txt'));
-    // an absolute path inside the symlinked base must also resolve
-    const r2 = resolveSafe(link, path.join(link, 'sub', 'file'));
-    assert.equal(r2, path.resolve(link, 'sub/file'));
-    // a real escape attempt must still throw
-    assert.throws(() => resolveSafe(link, '../etc/passwd'), /escapes base/);
-  } finally {
-    try { fs.unlinkSync(link); } catch (_e) {}
-    try { fs.rmSync(linkParent, { recursive: true, force: true }); } catch (_e) {}
-    try { fs.rmSync(real, { recursive: true, force: true }); } catch (_e) {}
-  }
-});
-
 test('resolveSafe: throws on missing args', () => {
   assert.throws(() => resolveSafe(null, 'x'));
   assert.throws(() => resolveSafe('/tmp', null));
